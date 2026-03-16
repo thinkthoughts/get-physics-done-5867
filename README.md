@@ -117,16 +117,16 @@ artifacts stored in the repository.
 
 # Example Workflow
 
-A typical cycle begins with a new physics paper.
+Typical: begin with an arXiv paper.
 
 ### Identify a paper
 
-    arXiv:2603.01575
+    arXiv:5867.01234
 
 ### Create a workspace
 
     papers/
-      2603.01575/
+      5867.01234/
         summary.md
         key-equations.md
         verification.py
@@ -166,7 +166,7 @@ Example artifact produced through the workflow.
 
 Paper:
 
-    arXiv:2603.01575
+    arXiv:5867.01234
 
 Reference geometry:
 
@@ -175,7 +175,7 @@ Reference geometry:
 
 Artifacts:
 
-    papers/2603.01575/
+    papers/5867.01234/
       summary.md
       key-equations.md
       verification.py
@@ -194,9 +194,7 @@ Verification typically includes:
 
   arXiv        Topic                                  Status
   ------------ -------------------------------------- ---------
-  2603.01575   intersubjective observables            mapping
-  2603.04792   gravitational-wave signal extraction   review
-  2603.xxxxx   music & neurocognition metaphor        notes
+  2603.01575   intersubjective observables            notes
 
 Each paper gets a structured workspace:
 
