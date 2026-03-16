@@ -1,3 +1,34 @@
+## Fork Notes (GPD-5867)
+
+This repository is a research-oriented fork of **Get Physics Done (GPD)**.
+
+The upstream project maintains the core research workflow and contribution
+policies described below, including the Contributor License Agreement (CLA).
+
+Additional contributions in this fork may focus on:
+
+• arXiv paper exploration  
+• verification notes and derivations  
+• diagrams and numerical checks  
+• open research discussion workflows
+
+Research notes are typically organized under:
+
+papers/
+  arxiv-id/
+    summary.md
+    key-equations.md
+    verification.py
+    diagrams/
+
+Research loop used in this fork:
+
+observe → verify → revise
+
+Discussion tags:
+
+#arXiv5867
+
 # Contributing to GPD
 
 Thanks for helping improve Get Physics Done.
