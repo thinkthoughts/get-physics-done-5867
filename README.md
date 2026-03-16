@@ -24,7 +24,7 @@ Research discussions and artifacts are tracked through:
 
 #arXiv5867
 
-## Papers Under Review (total: init) : Most Recent:
+## Papers Under Review (total: init) : First:
 
 - arXiv:2603.01575 – Intersubjectivity as a principle determining physical observables
 
