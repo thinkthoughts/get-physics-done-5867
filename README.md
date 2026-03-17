@@ -39,7 +39,7 @@ Research discussions and artifacts are tracked through:
 
 #arXiv5867
 
-## Papers (example: first executed verification artifact)
+## Papers (example: first executed verification)
 
 - arXiv:2603.01575 – Intersubjectivity as a principle determining physical observables
 - see PAPERS_VERIFIED.md
