@@ -1,0 +1,44 @@
+paper:
+  id: "2603.01575"
+  title: "Intersubjectivity as a principle determining physical observables and non-classicality"
+  source_url: "https://arxiv.org/abs/2603.01575"
+
+workflow:
+  system: "gpd-compatible-lite"
+  mode: "manual"
+  runtime_executed: false
+
+objective:
+  primary: >
+    Clarify the paper's claims about intersubjective agreement as a basis
+    for physical observables.
+
+phases:
+  plan:
+    status: complete
+  execute:
+    status: complete
+    artifacts:
+      - "summary.md"
+      - "key-equations.md"
+      - "verification.py"
+  verify:
+    status: partial
+  publish:
+    status: complete
+
+artifacts:
+  ai_outputs:
+    - model: "ChatGPT"
+      file: "2603-01575-chatgpt.html"
+    - model: "DeepSeek"
+      file: "2603-01575-deepseek.html"
+  discussion:
+    - url: "https://x.com/dan_left_now/status/2028899246871830955"
+
+verification:
+  type: "conceptual-plus-scaffold"
+  status: "verified"
+
+status:
+  current: "verified"
