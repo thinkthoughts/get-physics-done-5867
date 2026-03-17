@@ -1,6 +1,8 @@
-"""verification.py
+"""
+verification.py
 arXiv:2603.04792
-Simple Fourier-based signal detection demo.
+
+Fourier-based signal detection (positive frequency only).
 """
 
 import numpy as np
@@ -22,7 +24,12 @@ def main():
 
     freqs, fft_vals = compute_fft(data, sample_rate)
 
-    peak_freq = freqs[np.argmax(fft_vals)]
+    # 🔑 Only consider positive frequencies
+    positive = freqs > 0
+    freqs_pos = freqs[positive]
+    fft_pos = fft_vals[positive]
+
+    peak_freq = freqs_pos[np.argmax(fft_pos)]
 
     print("Verification: Fourier signal detection")
     print(f"Detected peak frequency: {peak_freq:.2f} Hz")
