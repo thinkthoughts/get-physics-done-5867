@@ -34,6 +34,15 @@ Initial areas for follow-up:
 - how predictive processing is linked to physical observables
 - what parts of the argument are operational vs interpretive
 
+## Verification
+
+Basic CHSH test executed with the included verification script.
+
+Result:
+|S| = 2√2
+
+This confirms the expected quantum bound for Bell correlations.
+
 ## Link
 
 https://arxiv.org/abs/2603.01575
