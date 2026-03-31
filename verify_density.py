@@ -5,21 +5,19 @@ verify_density.py
 
 Empirically measures the density of integers n <= L such that:
 - n ≡ 5 (mod 6)
-- gcd(n, P_k) = 1, where P_k is the primorial of the first k primes
+- and a selectable filter condition holds
+
+Supported modes:
+- primorial: gcd(n, P_k) = 1, where P_k is the primorial of the first k primes
+- mod25:     n % 25 != 0
+- custom_mod: n % m != 0 for a user-supplied modulus m
 
 Output is structured JSON for reproducibility.
 
-Example:
-    python verify_density.py --k-values 1 2 3 4 5 --L-values 1000 10000 100000
-
-Notes:
-- The normalization used here is exactly:
-      D_k(L) = |S_{k,L}| / (L / 6)
-  matching REQUIREMENTS.md
-- This version reports both:
-    1. empirical density
-    2. finite-k expected density from the Euler-product-style filter
-- Optional comparison to a global target (default 24/25) is retained.
+Examples:
+    python verify_density.py --mode primorial --k-values 1 2 3 4 5 --L-values 1000 10000 100000
+    python verify_density.py --mode mod25 --L-values 1000 10000 100000
+    python verify_density.py --mode custom_mod --modulus 25 --L-values 1000 10000 100000
 """
 
 from __future__ import annotations
@@ -28,7 +26,7 @@ import argparse
 import json
 import math
 from dataclasses import dataclass, asdict
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 DEFAULT_GLOBAL_TARGET = 24 / 25
@@ -36,21 +34,22 @@ DEFAULT_GLOBAL_TARGET = 24 / 25
 
 @dataclass
 class DensityResult:
-    k: int
+    mode: str
+    k: Optional[int]
     L: int
-    primorial: int
-    primes_used: List[int]
+    primorial: Optional[int]
+    primes_used: Optional[List[int]]
+    modulus: Optional[int]
     valid_count: int
     normalization_denominator: float
     empirical_density: float
-    expected_density_finite_k: float
-    absolute_error_vs_finite_k_expectation: float
+    expected_density_reference: float
+    absolute_error_vs_reference: float
     global_target_density: float
     absolute_error_vs_global_target: float
 
 
 def first_n_primes(n: int) -> List[int]:
-    """Return the first n primes."""
     if n < 0:
         raise ValueError("n must be non-negative")
     primes: List[int] = []
@@ -71,22 +70,15 @@ def first_n_primes(n: int) -> List[int]:
 
 
 def primorial(primes: List[int]) -> int:
-    """Return the product of a list of primes."""
     product = 1
     for p in primes:
         product *= p
     return product
 
 
-def count_valid_integers(L: int, Pk: int) -> int:
-    """
-    Count integers n <= L such that:
-    - n ≡ 5 (mod 6)
-    - gcd(n, Pk) = 1
-    """
+def count_valid_primorial(L: int, Pk: int) -> int:
     if L < 1:
         return 0
-
     count = 0
     for n in range(5, L + 1, 6):
         if math.gcd(n, Pk) == 1:
@@ -94,17 +86,23 @@ def count_valid_integers(L: int, Pk: int) -> int:
     return count
 
 
+def count_valid_modulus_exclusion(L: int, modulus: int) -> int:
+    if L < 1:
+        return 0
+    if modulus <= 0:
+        raise ValueError("modulus must be a positive integer")
+    count = 0
+    for n in range(5, L + 1, 6):
+        if n % modulus != 0:
+            count += 1
+    return count
+
+
 def finite_k_expected_density(primes_used: List[int]) -> float:
     """
-    Expected density within the progression n ≡ 5 (mod 6), under independence-style filtering.
-
-    Since n ≡ 5 (mod 6) already guarantees coprimality with 2 and 3,
-    primes 2 and 3 contribute no additional filtering here.
-
-    For each prime p >= 5 included in P_k, the surviving fraction is (1 - 1/p).
-
-    Therefore:
-        expected_density_finite_k = ∏_{p in primes_used, p >= 5} (1 - 1/p)
+    Within n ≡ 5 (mod 6), primes 2 and 3 are already excluded by the progression.
+    So the finite-k reference density is:
+        ∏_{p in primes_used, p >= 5} (1 - 1/p)
     """
     value = 1.0
     for p in primes_used:
@@ -113,14 +111,28 @@ def finite_k_expected_density(primes_used: List[int]) -> float:
     return value
 
 
-def classify_sequence(values: List[float], tolerance: float) -> str:
+def expected_density_modulus_exclusion(modulus: int) -> float:
     """
-    Lightweight empirical classification for the tested range only.
-    Returns one of:
-    - "convergent"
-    - "oscillatory"
-    - "inconclusive"
+    For the restricted progression n ≡ 5 (mod 6), estimate the reference density
+    for excluding multiples of 'modulus'.
+
+    If gcd(modulus, 6) = 1, multiples of 'modulus' appear with density 1/modulus
+    inside the progression, so the reference density is:
+        1 - 1/modulus
+
+    If modulus shares factors with 2 or 3, behavior depends on the residue class.
+    We reject those cases here to keep the interpretation precise.
     """
+    if modulus <= 0:
+        raise ValueError("modulus must be a positive integer")
+    if math.gcd(modulus, 6) != 1:
+        raise ValueError(
+            "For custom_mod mode, modulus must be coprime to 6 for the simple reference 1 - 1/modulus to apply cleanly."
+        )
+    return 1.0 - 1.0 / modulus
+
+
+def classify_sequence(values: List[float], tolerance: float = 1e-12) -> str:
     if len(values) < 3:
         return "inconclusive"
 
@@ -144,20 +156,15 @@ def classify_sequence(values: List[float], tolerance: float) -> str:
     return "inconclusive"
 
 
-def verify_density(
+def verify_density_primorial(
     k_values: List[int],
     L_values: List[int],
     global_target: float,
 ) -> Dict[str, Any]:
-    """Compute empirical density data and return a JSON-serializable report."""
     if not k_values:
-        raise ValueError("k_values must not be empty")
-    if not L_values:
-        raise ValueError("L_values must not be empty")
+        raise ValueError("k_values must not be empty for primorial mode")
     if any(k < 0 for k in k_values):
         raise ValueError("All k values must be non-negative")
-    if any(L < 1 for L in L_values):
-        raise ValueError("All L values must be positive integers")
 
     sorted_k = sorted(dict.fromkeys(k_values))
     sorted_L = sorted(dict.fromkeys(L_values))
@@ -168,53 +175,55 @@ def verify_density(
     for k in sorted_k:
         primes_used = first_n_primes(k)
         Pk = primorial(primes_used)
-        expected_finite_k = finite_k_expected_density(primes_used)
+        expected_ref = finite_k_expected_density(primes_used)
 
         empirical_densities_for_k: List[float] = []
 
         for L in sorted_L:
-            valid_count = count_valid_integers(L=L, Pk=Pk)
-            normalization_denominator = L / 6.0
-            empirical_density = valid_count / normalization_denominator if normalization_denominator else float("nan")
+            valid_count = count_valid_primorial(L=L, Pk=Pk)
+            denominator = L / 6.0
+            empirical_density = valid_count / denominator if denominator else float("nan")
 
-            abs_error_finite_k = abs(empirical_density - expected_finite_k)
-            abs_error_global = abs(empirical_density - global_target)
-
-            result = DensityResult(
-                k=k,
-                L=L,
-                primorial=Pk,
-                primes_used=primes_used,
-                valid_count=valid_count,
-                normalization_denominator=normalization_denominator,
-                empirical_density=empirical_density,
-                expected_density_finite_k=expected_finite_k,
-                absolute_error_vs_finite_k_expectation=abs_error_finite_k,
-                global_target_density=global_target,
-                absolute_error_vs_global_target=abs_error_global,
+            experiments.append(
+                asdict(
+                    DensityResult(
+                        mode="primorial",
+                        k=k,
+                        L=L,
+                        primorial=Pk,
+                        primes_used=primes_used,
+                        modulus=None,
+                        valid_count=valid_count,
+                        normalization_denominator=denominator,
+                        empirical_density=empirical_density,
+                        expected_density_reference=expected_ref,
+                        absolute_error_vs_reference=abs(empirical_density - expected_ref),
+                        global_target_density=global_target,
+                        absolute_error_vs_global_target=abs(empirical_density - global_target),
+                    )
+                )
             )
-            experiments.append(asdict(result))
             empirical_densities_for_k.append(empirical_density)
 
         sequence_summaries.append(
             {
+                "mode": "primorial",
                 "k": k,
                 "primorial": Pk,
                 "primes_used": primes_used,
-                "expected_density_finite_k": expected_finite_k,
+                "expected_density_reference": expected_ref,
                 "tested_L_values": sorted_L,
                 "empirical_densities": empirical_densities_for_k,
-                "classification_over_tested_range": classify_sequence(
-                    empirical_densities_for_k, tolerance=1e-12
-                ),
+                "classification_over_tested_range": classify_sequence(empirical_densities_for_k),
                 "finite_sample_only": True,
             }
         )
 
     return {
         "experiment": "number_theoretic_density_verification",
+        "mode": "primorial",
         "normalization": "D_k(L) = |S_{k,L}| / (L/6), where S_{k,L} = {n <= L : n ≡ 5 (mod 6), gcd(n, P_k)=1}",
-        "finite_k_expectation": "Within n ≡ 5 (mod 6), primes 2 and 3 are already excluded by the progression, so expected_density_finite_k = product over p in primes_used with p >= 5 of (1 - 1/p).",
+        "reference_density": "Within n ≡ 5 (mod 6), primes 2 and 3 are already excluded by the progression, so expected_density_reference = product over p in primes_used with p >= 5 of (1 - 1/p).",
         "parameters": {
             "k_values": sorted_k,
             "L_values": sorted_L,
@@ -225,16 +234,85 @@ def verify_density(
     }
 
 
+def verify_density_modulus(
+    mode: str,
+    modulus: int,
+    L_values: List[int],
+    global_target: float,
+) -> Dict[str, Any]:
+    if modulus <= 0:
+        raise ValueError("modulus must be a positive integer")
+    sorted_L = sorted(dict.fromkeys(L_values))
+    expected_ref = expected_density_modulus_exclusion(modulus)
+
+    experiments: List[Dict[str, Any]] = []
+    empirical_densities: List[float] = []
+
+    for L in sorted_L:
+        valid_count = count_valid_modulus_exclusion(L=L, modulus=modulus)
+        denominator = L / 6.0
+        empirical_density = valid_count / denominator if denominator else float("nan")
+
+        experiments.append(
+            asdict(
+                DensityResult(
+                    mode=mode,
+                    k=None,
+                    L=L,
+                    primorial=None,
+                    primes_used=None,
+                    modulus=modulus,
+                    valid_count=valid_count,
+                    normalization_denominator=denominator,
+                    empirical_density=empirical_density,
+                    expected_density_reference=expected_ref,
+                    absolute_error_vs_reference=abs(empirical_density - expected_ref),
+                    global_target_density=global_target,
+                    absolute_error_vs_global_target=abs(empirical_density - global_target),
+                )
+            )
+        )
+        empirical_densities.append(empirical_density)
+
+    return {
+        "experiment": "number_theoretic_density_verification",
+        "mode": mode,
+        "normalization": "D(L) = |S_L| / (L/6), where S_L = {n <= L : n ≡ 5 (mod 6), n % modulus != 0}",
+        "reference_density": "For modulus coprime to 6, expected_density_reference = 1 - 1/modulus within the progression n ≡ 5 (mod 6).",
+        "parameters": {
+            "modulus": modulus,
+            "L_values": sorted_L,
+            "global_target_density": global_target,
+        },
+        "results": experiments,
+        "sequence_summary": {
+            "mode": mode,
+            "modulus": modulus,
+            "expected_density_reference": expected_ref,
+            "tested_L_values": sorted_L,
+            "empirical_densities": empirical_densities,
+            "classification_over_tested_range": classify_sequence(empirical_densities),
+            "finite_sample_only": True,
+        },
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Empirically verify the density D_k(L) for n ≡ 5 (mod 6) and gcd(n, P_k)=1."
+        description="Empirically verify density over n ≡ 5 (mod 6) with selectable filters."
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["primorial", "mod25", "custom_mod"],
+        default="primorial",
+        help="Filter mode to test.",
     )
     parser.add_argument(
         "--k-values",
         nargs="+",
         type=int,
         default=[1, 2, 3, 4, 5],
-        help="List of k values, where P_k is the primorial of the first k primes.",
+        help="List of k values for primorial mode.",
     )
     parser.add_argument(
         "--L-values",
@@ -242,6 +320,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=[10**3, 10**4, 10**5],
         help="List of upper bounds L to test.",
+    )
+    parser.add_argument(
+        "--modulus",
+        type=int,
+        default=25,
+        help="Modulus used in custom_mod mode. Default 25.",
     )
     parser.add_argument(
         "--global-target",
@@ -260,11 +344,31 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    report = verify_density(
-        k_values=args.k_values,
-        L_values=args.L_values,
-        global_target=args.global_target,
-    )
+
+    if any(L < 1 for L in args.L_values):
+        raise ValueError("All L values must be positive integers")
+
+    if args.mode == "primorial":
+        report = verify_density_primorial(
+            k_values=args.k_values,
+            L_values=args.L_values,
+            global_target=args.global_target,
+        )
+    elif args.mode == "mod25":
+        report = verify_density_modulus(
+            mode="mod25",
+            modulus=25,
+            L_values=args.L_values,
+            global_target=args.global_target,
+        )
+    else:
+        report = verify_density_modulus(
+            mode="custom_mod",
+            modulus=args.modulus,
+            L_values=args.L_values,
+            global_target=args.global_target,
+        )
+
     print(json.dumps(report, indent=args.indent, sort_keys=False))
 
 
