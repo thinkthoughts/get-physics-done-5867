@@ -39,6 +39,107 @@ Research discussions and artifacts are tracked through:
 
 #arXiv5867
 
+## Verified Density Systems (Constraint vs Sieve)
+
+This repository includes a reproducible example demonstrating two distinct behaviors over:
+
+n ≡ 5 (mod 6)
+
+### Primorial Sieve (multiplicative filtering)
+
+```
+gcd(n, P_k) = 1
+```
+
+Reference:
+
+```
+D_k = ∏(1 - 1/p)
+```
+
+Behavior:
+
+```
+D_k → 0
+```
+
+---
+
+### Structured Modular Constraint
+
+```
+n % m ≠ 0
+```
+
+Reference:
+
+```
+D = 1 - 1/m
+```
+
+Example:
+
+```
+m = 25 → D = 24/25 = 0.96
+```
+
+---
+
+### Multi-Constraint System
+
+```
+n % m_i ≠ 0  for all i
+```
+
+Reference:
+
+```
+D = ∏ (1 - 1/m_i)
+```
+
+Example:
+
+```
+m = 25, 49 → D ≈ 0.940408
+```
+
+---
+
+### Run Verification
+
+```
+python3 verify_density.py --mode primorial
+python3 verify_density.py --mode mod25
+python3 verify_density.py --mode multi_constraint --moduli 25 49
+```
+
+---
+
+### Reference Derivations
+
+```
+python3 derive_density_reference.py --mode primorial
+python3 derive_density_reference.py --mode mod25
+```
+
+---
+
+### Paper
+
+See:
+
+```
+derivation.pdf
+```
+
+---
+
+### Core Result
+
+Multiplicative prime filtering causes density collapse.
+Finite modular constraints preserve bounded density.
+
+
 ## Papers (example: first executed verification)
 
 - arXiv:2603.01575 – Intersubjectivity as a principle determining physical observables
