@@ -8,16 +8,22 @@ Empirically measures the density of integers n <= L such that:
 - and a selectable filter condition holds
 
 Supported modes:
-- primorial: gcd(n, P_k) = 1, where P_k is the primorial of the first k primes
-- mod25:     n % 25 != 0
-- custom_mod: n % m != 0 for a user-supplied modulus m
+- primorial:
+    gcd(n, P_k) = 1, where P_k is the primorial of the first k primes
+- mod25:
+    n % 25 != 0
+- custom_mod:
+    n % m != 0 for a user-supplied modulus m
+- multi_constraint:
+    n % m != 0 for every user-supplied modulus m in a finite list
 
 Output is structured JSON for reproducibility.
 
 Examples:
-    python verify_density.py --mode primorial --k-values 1 2 3 4 5 --L-values 1000 10000 100000
-    python verify_density.py --mode mod25 --L-values 1000 10000 100000
-    python verify_density.py --mode custom_mod --modulus 25 --L-values 1000 10000 100000
+    python3 verify_density.py --mode primorial --k-values 1 2 3 4 5 --L-values 1000 10000 100000
+    python3 verify_density.py --mode mod25 --L-values 1000 10000 100000
+    python3 verify_density.py --mode custom_mod --modulus 25 --L-values 1000 10000 100000
+    python3 verify_density.py --mode multi_constraint --moduli 25 49 --L-values 1000 10000 100000
 """
 
 from __future__ import annotations
@@ -40,6 +46,7 @@ class DensityResult:
     primorial: Optional[int]
     primes_used: Optional[List[int]]
     modulus: Optional[int]
+    moduli: Optional[List[int]]
     valid_count: int
     normalization_denominator: float
     empirical_density: float
@@ -98,6 +105,22 @@ def count_valid_modulus_exclusion(L: int, modulus: int) -> int:
     return count
 
 
+def count_valid_multi_constraint(L: int, moduli: List[int]) -> int:
+    if L < 1:
+        return 0
+    if not moduli:
+        raise ValueError("moduli must not be empty")
+    for m in moduli:
+        if m <= 0:
+            raise ValueError("all moduli must be positive integers")
+
+    count = 0
+    for n in range(5, L + 1, 6):
+        if all(n % m != 0 for m in moduli):
+            count += 1
+    return count
+
+
 def finite_k_expected_density(primes_used: List[int]) -> float:
     """
     Within n ≡ 5 (mod 6), primes 2 and 3 are already excluded by the progression.
@@ -111,25 +134,57 @@ def finite_k_expected_density(primes_used: List[int]) -> float:
     return value
 
 
-def expected_density_modulus_exclusion(modulus: int) -> float:
-    """
-    For the restricted progression n ≡ 5 (mod 6), estimate the reference density
-    for excluding multiples of 'modulus'.
-
-    If gcd(modulus, 6) = 1, multiples of 'modulus' appear with density 1/modulus
-    inside the progression, so the reference density is:
-        1 - 1/modulus
-
-    If modulus shares factors with 2 or 3, behavior depends on the residue class.
-    We reject those cases here to keep the interpretation precise.
-    """
+def validate_modulus_for_progression(modulus: int) -> None:
     if modulus <= 0:
         raise ValueError("modulus must be a positive integer")
     if math.gcd(modulus, 6) != 1:
         raise ValueError(
-            "For custom_mod mode, modulus must be coprime to 6 for the simple reference 1 - 1/modulus to apply cleanly."
+            "modulus must be coprime to 6 for the simple reference 1 - 1/modulus to apply cleanly within n ≡ 5 (mod 6)."
         )
+
+
+def expected_density_modulus_exclusion(modulus: int) -> float:
+    """
+    For the restricted progression n ≡ 5 (mod 6), if gcd(modulus, 6)=1 then
+    multiples of modulus appear with density 1/modulus inside the progression.
+    So the reference density is:
+        1 - 1/modulus
+    """
+    validate_modulus_for_progression(modulus)
     return 1.0 - 1.0 / modulus
+
+
+def pairwise_coprime(values: List[int]) -> bool:
+    for i in range(len(values)):
+        for j in range(i + 1, len(values)):
+            if math.gcd(values[i], values[j]) != 1:
+                return False
+    return True
+
+
+def expected_density_multi_constraint(moduli: List[int]) -> float:
+    """
+    For a finite list of pairwise-coprime moduli, each also coprime to 6,
+    the excluded classes behave independently within n ≡ 5 (mod 6), so:
+
+        expected_density_reference = ∏ (1 - 1/m)
+
+    This keeps the interpretation precise and avoids accidental overlap errors.
+    """
+    if not moduli:
+        raise ValueError("moduli must not be empty")
+    unique_moduli = sorted(dict.fromkeys(moduli))
+    for m in unique_moduli:
+        validate_modulus_for_progression(m)
+    if not pairwise_coprime(unique_moduli):
+        raise ValueError(
+            "multi_constraint reference currently requires pairwise-coprime moduli."
+        )
+
+    value = 1.0
+    for m in unique_moduli:
+        value *= (1.0 - 1.0 / m)
+    return value
 
 
 def classify_sequence(values: List[float], tolerance: float = 1e-12) -> str:
@@ -193,6 +248,7 @@ def verify_density_primorial(
                         primorial=Pk,
                         primes_used=primes_used,
                         modulus=None,
+                        moduli=None,
                         valid_count=valid_count,
                         normalization_denominator=denominator,
                         empirical_density=empirical_density,
@@ -240,8 +296,6 @@ def verify_density_modulus(
     L_values: List[int],
     global_target: float,
 ) -> Dict[str, Any]:
-    if modulus <= 0:
-        raise ValueError("modulus must be a positive integer")
     sorted_L = sorted(dict.fromkeys(L_values))
     expected_ref = expected_density_modulus_exclusion(modulus)
 
@@ -262,6 +316,7 @@ def verify_density_modulus(
                     primorial=None,
                     primes_used=None,
                     modulus=modulus,
+                    moduli=None,
                     valid_count=valid_count,
                     normalization_denominator=denominator,
                     empirical_density=empirical_density,
@@ -297,13 +352,75 @@ def verify_density_modulus(
     }
 
 
+def verify_density_multi_constraint(
+    moduli: List[int],
+    L_values: List[int],
+    global_target: float,
+) -> Dict[str, Any]:
+    unique_moduli = sorted(dict.fromkeys(moduli))
+    sorted_L = sorted(dict.fromkeys(L_values))
+    expected_ref = expected_density_multi_constraint(unique_moduli)
+
+    experiments: List[Dict[str, Any]] = []
+    empirical_densities: List[float] = []
+
+    for L in sorted_L:
+        valid_count = count_valid_multi_constraint(L=L, moduli=unique_moduli)
+        denominator = L / 6.0
+        empirical_density = valid_count / denominator if denominator else float("nan")
+
+        experiments.append(
+            asdict(
+                DensityResult(
+                    mode="multi_constraint",
+                    k=None,
+                    L=L,
+                    primorial=None,
+                    primes_used=None,
+                    modulus=None,
+                    moduli=unique_moduli,
+                    valid_count=valid_count,
+                    normalization_denominator=denominator,
+                    empirical_density=empirical_density,
+                    expected_density_reference=expected_ref,
+                    absolute_error_vs_reference=abs(empirical_density - expected_ref),
+                    global_target_density=global_target,
+                    absolute_error_vs_global_target=abs(empirical_density - global_target),
+                )
+            )
+        )
+        empirical_densities.append(empirical_density)
+
+    return {
+        "experiment": "number_theoretic_density_verification",
+        "mode": "multi_constraint",
+        "normalization": "D(L) = |S_L| / (L/6), where S_L = {n <= L : n ≡ 5 (mod 6), and n % m != 0 for every m in moduli}",
+        "reference_density": "For pairwise-coprime moduli, each coprime to 6, expected_density_reference = product over m in moduli of (1 - 1/m).",
+        "parameters": {
+            "moduli": unique_moduli,
+            "L_values": sorted_L,
+            "global_target_density": global_target,
+        },
+        "results": experiments,
+        "sequence_summary": {
+            "mode": "multi_constraint",
+            "moduli": unique_moduli,
+            "expected_density_reference": expected_ref,
+            "tested_L_values": sorted_L,
+            "empirical_densities": empirical_densities,
+            "classification_over_tested_range": classify_sequence(empirical_densities),
+            "finite_sample_only": True,
+        },
+    }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Empirically verify density over n ≡ 5 (mod 6) with selectable filters."
     )
     parser.add_argument(
         "--mode",
-        choices=["primorial", "mod25", "custom_mod"],
+        choices=["primorial", "mod25", "custom_mod", "multi_constraint"],
         default="primorial",
         help="Filter mode to test.",
     )
@@ -326,6 +443,13 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=25,
         help="Modulus used in custom_mod mode. Default 25.",
+    )
+    parser.add_argument(
+        "--moduli",
+        nargs="+",
+        type=int,
+        default=[25, 49],
+        help="Finite list of moduli used in multi_constraint mode.",
     )
     parser.add_argument(
         "--global-target",
@@ -361,10 +485,16 @@ def main() -> None:
             L_values=args.L_values,
             global_target=args.global_target,
         )
-    else:
+    elif args.mode == "custom_mod":
         report = verify_density_modulus(
             mode="custom_mod",
             modulus=args.modulus,
+            L_values=args.L_values,
+            global_target=args.global_target,
+        )
+    else:
+        report = verify_density_multi_constraint(
+            moduli=args.moduli,
             L_values=args.L_values,
             global_target=args.global_target,
         )
