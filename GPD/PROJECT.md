@@ -1,204 +1,193 @@
-# Project: Constraint-First Invariant Framework (24/25, 45°) for Verifiable Systems
+# Project: Constraint-Structured Density vs Primorial Sieve
 
 ## Summary
 
-This project defines and verifies a **constraint-first invariant framework** based on:
+This project defines and verifies two distinct density systems over the progression:
 
-- a number-theoretic density limit:  
-  **24/25 < 1**
+n ≡ 5 (mod 6)
 
-- a geometric projection constraint:  
-  **θ ≤ 45°**, equivalently **cos(θ) ≥ 1/√2**
+1. **Primorial sieve (multiplicative filtering)**
+2. **Structured modular constraints (finite exclusions)**
 
-The framework models systems as collections of **atoms** (minimal discrete units) under transformation, and tests whether invariants are preserved under those transformations.
+The objective is to demonstrate that:
 
-The objective is to establish a **reproducible verification layer** applicable across:
-
-- number theory  
-- geometric projection systems  
-- physical interaction models (atomic / molecular)  
-- AI systems (vector similarity, constraint gating)
+- multiplicative prime filtering produces density decay
+- structured modular constraints preserve bounded density
 
 ---
 
-## Definitions
+## Domain Definition
 
-### Atoms
+All measurements are taken over:
 
-“Atoms” denote minimal discrete units of a system.  
-Depending on domain, atoms may correspond to:
+S_L = { n ≤ L : n ≡ 5 (mod 6) }
 
-- integers (number theory)  
-- vectors (geometry / AI)  
-- physical particles or states (physics)
+Normalization:
 
-No domain-specific assumptions are required beyond discreteness.
+D(L) = |S_L| / (L / 6)
 
 ---
 
-### Transformation
+## System 1 — Primorial Sieve
+
+### Definition
 
 Let:
 
-- atoms ∈ A  
-- T: A → A be a transformation operator  
+P_k = product of first k primes
+
+Filter:
+
+gcd(n, P_k) = 1
+
+### Reference Density
+
+Only primes p ≥ 5 contribute within n ≡ 5 (mod 6), so:
+
+D_k = ∏_{p ≥ 5, p ∈ primes_used} (1 - 1/p)
+
+### Verified Behavior
+
+- k=3 → 0.8  
+- k=4 → 0.685714...  
+- k=5 → 0.623376...  
+
+As k increases:
+
+D_k → 0
 
 ---
 
-### Evaluation Function
+## System 2 — Structured Modular Constraint
 
-Let:
+### Definition
 
-- f: A → ℝ  
+Fix modulus m such that gcd(m, 6) = 1
 
-f(atoms) defines a measurable property (e.g., density, norm, similarity).
+Filter:
 
----
+n % m ≠ 0
 
-## Core Conditions
+### Reference Density
 
-A system is considered **stable** if all three conditions hold:
+D = 1 - 1/m
 
-### (1) Bounded Density
+### Verified Case
 
-For the number-theoretic construction:
+m = 25:
 
-- n ≡ 5 mod 6  
-- gcd(n, Pₖ) = 1 (coprime to primorial Pₖ)
+D = 24/25 = 0.96
 
-Then:
+Empirical verification:
 
-lim (density of valid n ≤ L) = 24/25 < 1
-
-This defines a **nontrivial upper bound strictly below unity**.
-
----
-
-### (2) Projection Constraint
-
-For any transformation:
-
-- θ = angle(atoms, T(atoms))
-
-Constraint:
-
-- θ ≤ 45°  
-- cos(θ) ≥ 1/√2
-
-This enforces a **bounded deviation condition**.
+- L=1,000 → 0.96  
+- L=10,000 → 0.96  
+- L=100,000 → 0.96  
 
 ---
 
-### (3) Invariant Preservation
+## System 3 — Multi-Constraint (Finite Structured Product)
 
-Transformation T must satisfy:
+### Definition
 
-f(T(atoms)) ≈ f(atoms)
+Given moduli m₁, m₂, ..., m_k such that:
 
-Formally:
+- gcd(m_i, 6) = 1
+- moduli are pairwise coprime
 
-|f(T(atoms)) − f(atoms)| ≤ ε
+Filter:
 
-for small ε under iteration.
+n % m_i ≠ 0 for all i
 
----
+### Reference Density
 
-## System Model
+D = ∏ (1 - 1/m_i)
 
-A system is defined by:
+### Verified Case
 
-- atomic state: atoms ∈ A  
-- transformation: T  
-- evaluation: f  
+m₁ = 25, m₂ = 49:
 
-Subject to:
+D = (24/25)(48/49) ≈ 0.940408...
 
-1. f(atoms) < 1  
-2. θ(atoms, T(atoms)) ≤ 45°  
-3. |f(T(atoms)) − f(atoms)| ≤ ε  
+Empirical:
 
----
-
-## Interpretation (Non-Metaphorical)
-
-- “Structure” = constraint satisfaction  
-- “Stability” = invariant preservation under T  
-- “Scaling” = repeated application of T without violation  
-
-No metaphorical or narrative interpretation is required.
+- L=1,000 → 0.942  
+- L=10,000 → 0.9402  
+- L=100,000 → 0.94038  
 
 ---
 
-## Implementation Plan
+## Key Result
 
-### Phase 1 — Density Verification
-- compute empirical density for n ≡ 5 mod 6  
-- enforce gcd(n, Pₖ) = 1  
-- verify convergence → 24/25  
+Two distinct density behaviors exist:
 
-### Phase 2 — Projection System
-- represent atoms as vectors  
-- compute θ via dot product  
-- enforce cos(θ) ≥ 1/√2  
+### Multiplicative sieve
 
-### Phase 3 — Transformation Tests
-- define candidate transformations T  
-- measure deviation |f(T(atoms)) − f(atoms)|  
+D_k = ∏ (1 - 1/p) → 0
 
-### Phase 4 — Cross-Domain Validation
-Apply identical constraints to:
+### Structured constraints
 
-- integer sets  
-- vector spaces  
-- physical interaction models  
-- AI embedding spaces  
-
-### Phase 5 — Constraint Gate
-- implement verify-before-act system  
-- block transformations violating any condition  
+D = ∏ (1 - 1/m_i) → bounded constant
 
 ---
 
-## Deliverables
+## Interpretation
 
-- `derivation.tex` — formal proof of density result  
-- `verify_density.py` — numerical validation  
-- `projection_tests.py` — angle constraint verification  
-- `constraint.py` — gating logic  
-- `cross_domain_validation.md` — domain applications  
+- Primorial filtering introduces **unbounded constraint accumulation**
+- Structured modular constraints introduce **finite constraint structure**
+
+Therefore:
+
+> Density collapse is not inherent to filtering — it is specific to multiplicative prime accumulation.
+
+---
+
+## Implementation
+
+### Empirical
+
+verify_density.py
+
+Modes:
+
+- primorial
+- mod25
+- custom_mod
+- multi_constraint
+
+### Reference
+
+derive_density_reference.py
+
+Outputs:
+
+- symbolic expressions
+- exact numeric values
 
 ---
 
 ## Success Criteria
 
-The framework is validated if:
+The project is validated if:
 
-1. Density converges reproducibly to 24/25 < 1  
-2. Projection constraint prevents divergence under iteration  
-3. Invariant deviation remains bounded (ε small)  
-4. All conditions hold across multiple domains without modification  
+1. empirical densities converge to reference densities in all modes  
+2. primorial mode exhibits monotonic decay  
+3. modular constraint modes remain bounded  
+4. multi-constraint mode matches finite product reference  
 
 ---
 
 ## Position
 
-This project defines:
+This project establishes:
 
-- a **constraint-based verification layer**  
-- a **domain-independent invariant system**  
-
-It is evaluated strictly by:
-
-- reproducibility  
-- bounded error  
-- cross-domain consistency  
+- a reproducible distinction between multiplicative sieve systems and structured constraint systems  
+- a framework for analyzing density preservation under finite constraints  
 
 ---
 
-## Next Step
+## Next Steps
 
-Proceed to:
-
-- `REQUIREMENTS.md` (formal test conditions)  
-- `derivation.tex` (proof)  
-- `verify_density.py` (empirical validation)
+- extend structured constraints beyond simple modulus exclusion  
+- analyze interaction between residue classes and constraint sets  
+- formalize derivations in derivation.tex
