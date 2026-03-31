@@ -11,7 +11,7 @@
 **Get Physics Done 5867 (GPD-5867)** is a research-workflow fork of
 **Get Physics Done (GPD)** from Physical Superintelligence PBC.
 
-This fork focuses on **open verification workflows around physics papers**, especially arXiv research discussions and reproducible derivations.
+This fork focuses on **open verification workflows around physics papers and reproducible constraint-based derivations**, especially arXiv research discussions and reproducible derivations.
 
 ## Physics Verification Workflow
 
