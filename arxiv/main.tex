@@ -14,6 +14,8 @@
 We analyze density over the progression $n \equiv 5 \pmod{6}$ under two filtering regimes: primorial (multiplicative) sieves and finite modular constraints. We prove and verify that primorial filtering yields densities $D_k = \prod_{p \ge 5}(1 - 1/p)$ that decay to zero, whereas finite modular exclusions yield densities $D = \prod_i (1 - 1/m_i)$ that remain bounded, including the exact case $24/25$. This establishes a structural distinction between unbounded multiplicative filtering and finite constraint systems, with reproducible empirical validation.
 \end{abstract}
 
+\noindent Code and data: \texttt{https://github.com/thinkthoughts/get-physics-done-5867}
+
 \section{Introduction}
 
 Density questions over restricted residue classes arise naturally in analytic number theory, particularly in the study of sieve methods and multiplicative structures. Classical sieve constructions, such as primorial filtering, produce densities expressed as products over primes, leading to asymptotic decay as more primes are included.
@@ -84,6 +86,25 @@ Example:
 \[
 D = \frac{24}{25} \cdot \frac{48}{49}.
 \]
+
+\section{Main Result}
+
+Let $S_L = \{ n \leq L : n \equiv 5 \pmod{6} \}$.
+
+\begin{itemize}
+\item Under primorial filtering,
+\[
+D_k = \prod_{p \geq 5} \left(1 - \frac{1}{p}\right) \to 0.
+\]
+
+\item Under finite modular constraints,
+\[
+D = \prod_{i=1}^r \left(1 - \frac{1}{m_i}\right),
+\]
+which remains bounded for fixed $r$.
+\end{itemize}
+
+Thus, density collapse occurs under unbounded multiplicative filtering, but not under finite structured constraints.
 
 \section{Conclusion}
 
