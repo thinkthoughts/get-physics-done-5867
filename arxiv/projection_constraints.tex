@@ -1,0 +1,235 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{Projection Constraints and Stability Under Bounded Density Regimes}
+\author{}
+\date{}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We study projection stability associated with bounded density regimes arising from finite modular constraints. Starting from subsets of the arithmetic progression $n \equiv 5 \pmod{6}$ with positive relative density, we define normalized projection observables and show that finite exclusion systems preserve nondegenerate projected mass. In contrast with unbounded multiplicative sieves, which drive density to zero, bounded density regimes admit stable lower bounds under projection. We formulate this distinction in elementary geometric terms and exhibit an explicit threshold interpretation at angle $\pi/4$.
+\end{abstract}
+
+\section{Introduction}
+
+Finite modular exclusion systems preserve positive density, whereas unbounded multiplicative sieves drive density to zero. This distinction suggests a corresponding difference in projection behavior: when mass remains bounded away from zero, normalized projections remain nondegenerate; when density collapses, projected mass collapses as well.
+
+The purpose of this paper is to formalize this simple geometric consequence. We work in a finite-density setting motivated by arithmetic subsets of
+\[
+\mathcal{A} = \{ n \in \mathbb{N} : n \equiv 5 \pmod{6} \}.
+\]
+Our focus is not on sieve asymptotics themselves, but on what positive relative density implies for projected observables.
+
+\section{Density Regimes}
+
+Let $\mathcal{A} \subset \mathbb{N}$ denote the progression
+\[
+\mathcal{A} = \{ n \in \mathbb{N} : n \equiv 5 \pmod{6} \}.
+\]
+
+For a subset $S \subseteq \mathcal{A}$, define the relative density of $S$ in $\mathcal{A}$, when it exists, by
+\[
+\delta_{\mathcal{A}}(S)
+=
+\lim_{N \to \infty}
+\frac{\#\{n \le N : n \in S\}}
+{\#\{n \le N : n \in \mathcal{A}\}}.
+\]
+
+We will assume throughout that $S$ arises from a finite modular exclusion system and hence satisfies
+\[
+0 < \delta_{\mathcal{A}}(S) \le 1.
+\]
+
+A model example is the single exclusion modulus $25$, for which the relative density is
+\[
+\delta_{\mathcal{A}}(S)=\frac{24}{25}.
+\]
+
+\section{Projection Model}
+
+We now define a simple projection observable associated with a density regime.
+
+\begin{definition}
+Let $S \subseteq \mathcal{A}$ have relative density $\delta = \delta_{\mathcal{A}}(S)$. For an angle $\theta \in [0,\pi/2]$, define the projected mass
+\[
+P_\theta(S) = \delta \cos \theta.
+\]
+\end{definition}
+
+This quantity records the scalar projection of normalized mass $\delta$ onto a direction making angle $\theta$ with a reference axis.
+
+\begin{definition}
+A density regime is called \emph{projection-stable at angle $\theta$} if
+\[
+P_\theta(S) > 0.
+\]
+It is called \emph{uniformly projection-stable on an interval $I \subseteq [0,\pi/2]$} if
+\[
+\inf_{\theta \in I} P_\theta(S) > 0.
+\]
+\end{definition}
+
+Since $\cos \theta > 0$ for $\theta \in [0,\pi/2)$, every positive-density regime is projection-stable on every compact interval strictly contained in $[0,\pi/2)$.
+
+\section{Finite Constraints Preserve Projection Mass}
+
+We formalize the preceding observation.
+
+\begin{proposition}
+Let $S \subseteq \mathcal{A}$ satisfy $\delta_{\mathcal{A}}(S)=\delta>0$. Then for every $\theta \in [0,\pi/2)$,
+\[
+P_\theta(S)=\delta\cos\theta > 0.
+\]
+\end{proposition}
+
+\begin{proof}
+Since $\delta>0$ and $\cos\theta>0$ for $\theta \in [0,\pi/2)$, the product is positive.
+\end{proof}
+
+\begin{theorem}
+Let $(S_j)$ be a family of subsets of $\mathcal{A}$ induced by finite modular exclusion systems such that
+\[
+\delta_{\mathcal{A}}(S_j) \ge \delta_0 > 0
+\quad\text{for all } j.
+\]
+Then for every compact interval $I \subset [0,\pi/2)$,
+\[
+\inf_j \inf_{\theta \in I} P_\theta(S_j) \ge \delta_0 \inf_{\theta \in I}\cos\theta > 0.
+\]
+In particular, the family is uniformly projection-stable on $I$.
+\end{theorem}
+
+\begin{proof}
+For each $j$ and $\theta \in I$,
+\[
+P_\theta(S_j)=\delta_{\mathcal{A}}(S_j)\cos\theta \ge \delta_0 \cos\theta.
+\]
+Taking infima over $j$ and $\theta \in I$ gives
+\[
+\inf_j \inf_{\theta \in I} P_\theta(S_j)
+\ge
+\delta_0 \inf_{\theta \in I}\cos\theta.
+\]
+Since $I$ is compact and contained in $[0,\pi/2)$, the cosine function has strictly positive minimum on $I$.
+\end{proof}
+
+\section{Collapse Under Vanishing Density}
+
+We now contrast finite exclusion systems with unbounded multiplicative sieves.
+
+\begin{theorem}
+Let $(S_k)$ be a sequence of subsets of $\mathcal{A}$ such that
+\[
+\delta_{\mathcal{A}}(S_k)\to 0.
+\]
+Then for every fixed $\theta \in [0,\pi/2]$,
+\[
+P_\theta(S_k)\to 0.
+\]
+\end{theorem}
+
+\begin{proof}
+By definition,
+\[
+P_\theta(S_k)=\delta_{\mathcal{A}}(S_k)\cos\theta.
+\]
+Since $0 \le \cos\theta \le 1$ and $\delta_{\mathcal{A}}(S_k)\to 0$, the product converges to $0$.
+\end{proof}
+
+This theorem captures the geometric consequence of density collapse: projected mass vanishes together with the underlying density.
+
+\section{Threshold at $\pi/4$}
+
+A useful reference angle is
+\[
+\theta = \frac{\pi}{4},
+\]
+for which
+\[
+\cos\left(\frac{\pi}{4}\right)=\frac{1}{\sqrt{2}}.
+\]
+
+\begin{proposition}
+If $S \subseteq \mathcal{A}$ has relative density $\delta>0$, then at angle $\pi/4$,
+\[
+P_{\pi/4}(S)=\frac{\delta}{\sqrt{2}}.
+\]
+\end{proposition}
+
+\begin{proof}
+Substitute $\theta=\pi/4$ into the definition of $P_\theta(S)$.
+\end{proof}
+
+For the explicit bounded-density example
+\[
+\delta=\frac{24}{25},
+\]
+we obtain
+\[
+P_{\pi/4}(S)=\frac{24}{25\sqrt{2}}.
+\]
+
+Thus the relative density $24/25$ remains nondegenerate after projection by angle $\pi/4$.
+
+\section{Normalized Two-Coordinate Form}
+
+The same observation may be written in two-coordinate form. Consider the vector
+\[
+v_\delta = (\delta,\delta)\in\mathbb{R}^2.
+\]
+Its Euclidean norm is
+\[
+\|v_\delta\| = \sqrt{\delta^2+\delta^2} = \delta\sqrt{2}.
+\]
+Projection onto the unit vector
+\[
+u = \frac{1}{\sqrt{2}}(1,1)
+\]
+gives
+\[
+\langle v_\delta, u\rangle
+=
+\delta\sqrt{2}.
+\]
+
+Equivalently, each coordinate contributes equally, and the normalized axis projection is governed by the factor $1/\sqrt{2}$. Positive density therefore corresponds to positive diagonal projection.
+
+\section{Interpretation}
+
+The preceding results are elementary but useful. They show:
+
+\begin{itemize}
+    \item finite modular constraints preserve positive density;
+    \item positive density preserves nonzero projected mass;
+    \item vanishing density forces projection collapse;
+    \item the angle $\pi/4$ provides a natural symmetric threshold with projection factor $1/\sqrt{2}$.
+\end{itemize}
+
+In this sense, projection stability is not an independent phenomenon; it is a geometric reformulation of bounded density.
+
+\section{Conclusion}
+
+Finite exclusion systems produce bounded positive density regimes. Once such a regime is fixed, projection observables remain nondegenerate on every compact angular interval strictly below $\pi/2$. In contrast, unbounded multiplicative filtering drives density to zero, and projected mass collapses accordingly.
+
+The explicit case $\delta=24/25$ illustrates this distinction in a concrete way:
+\[
+\delta=\frac{24}{25}
+\quad\Longrightarrow\quad
+P_{\pi/4}=\frac{24}{25\sqrt{2}}.
+\]
+This gives a simple geometric expression of the stability preserved by finite modular constraints.
+
+\end{document}

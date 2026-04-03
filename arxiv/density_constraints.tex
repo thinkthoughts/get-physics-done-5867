@@ -1,0 +1,129 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{Density Behavior Under Finite Modular Constraints}
+\author{}
+\date{}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We analyze the density of integers in the arithmetic progression $n \equiv 5 \pmod{6}$ under two filtering regimes: (i) multiplicative sieves induced by primorial divisibility, and (ii) finite modular exclusion constraints. We show that while primorial sieves drive density to zero as the set of excluded primes grows, any finite system of modular exclusions preserves a strictly positive limiting density. We compute exact densities for finite exclusion sets and exhibit the explicit case $24/25$ as a representative bounded density.
+\end{abstract}
+
+\section{Introduction}
+
+Let
+\[
+\mathcal{A} = \{ n \in \mathbb{N} : n \equiv 5 \pmod{6} \}.
+\]
+
+We study the asymptotic density of subsets of $\mathcal{A}$ obtained by excluding divisibility by selected integers. Two regimes are considered:
+
+\begin{itemize}
+    \item Infinite multiplicative exclusion (primorial sieve)
+    \item Finite modular exclusion systems
+\end{itemize}
+
+We show that these regimes exhibit fundamentally different density behavior.
+
+\section{Preliminaries}
+
+\subsection{Natural Density}
+
+For a set $S \subset \mathbb{N}$, define the natural density:
+\[
+d(S) = \lim_{N \to \infty} \frac{1}{N} \#\{ n \leq N : n \in S \},
+\]
+when the limit exists.
+
+\subsection{Base Progression}
+
+The set $\mathcal{A}$ has density:
+\[
+d(\mathcal{A}) = \frac{1}{6}.
+\]
+
+\section{Finite Modular Constraints}
+
+Let $M = \{ m_1, m_2, \dots, m_k \}$ be a finite set of integers with $m_i \geq 2$.
+
+Define:
+\[
+\mathcal{A}_M = \{ n \in \mathcal{A} : \gcd(n, m_i) = 1 \ \forall i \}.
+\]
+
+\begin{theorem}
+If the constraints $m_1, \dots, m_k$ are pairwise independent in the sense of multiplicative density, then
+\[
+d(\mathcal{A}_M) = d(\mathcal{A}) \prod_{i=1}^k \left(1 - \frac{1}{m_i}\right).
+\]
+\end{theorem}
+
+\begin{proof}
+Each constraint $\gcd(n, m_i) = 1$ removes a fraction $1/m_i$ of admissible integers under independence. Since the exclusion set is finite, the resulting density is the product of surviving proportions. Standard inclusion-exclusion completes the proof.
+\end{proof}
+
+\section{Explicit Example}
+
+Consider the single constraint $m = 25$.
+
+Then:
+\[
+d(\mathcal{A}_{\{25\}}) = d(\mathcal{A}) \left(1 - \frac{1}{25}\right) = \frac{1}{6} \cdot \frac{24}{25}.
+\]
+
+Thus, the relative density within $\mathcal{A}$ is:
+\[
+\frac{24}{25}.
+\]
+
+This demonstrates that finite modular exclusion preserves a bounded density strictly less than $1$ but strictly greater than $0$.
+
+\section{Primorial Sieve Contrast}
+
+Let $P_k = \prod_{p \leq k} p$ denote the $k$-th primorial.
+
+Define:
+\[
+\mathcal{A}_{P_k} = \{ n \in \mathcal{A} : \gcd(n, P_k) = 1 \}.
+\]
+
+Then:
+\[
+d(\mathcal{A}_{P_k}) = d(\mathcal{A}) \prod_{p \leq k} \left(1 - \frac{1}{p}\right).
+\]
+
+\begin{theorem}
+\[
+\lim_{k \to \infty} d(\mathcal{A}_{P_k}) = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+It is classical that
+\[
+\prod_{p \leq k} \left(1 - \frac{1}{p}\right) \to 0
+\]
+as $k \to \infty$, since the sum of reciprocals of primes diverges. The result follows.
+\end{proof}
+
+\section{Conclusion}
+
+We have established a structural distinction:
+
+\begin{itemize}
+    \item Infinite multiplicative exclusion drives density to zero
+    \item Finite modular constraints preserve a strictly positive density
+\end{itemize}
+
+Finite constraint systems therefore define stable density regimes, with explicit computable values such as $24/25$.
+
+\end{document}

@@ -1,0 +1,155 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{Constraint-Gated Decision Systems and Threshold Stability}
+\author{}
+\date{}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We introduce a constraint-gated decision framework in which actions are permitted only when a normalized alignment score exceeds a fixed threshold. The framework is defined in terms of inner products in a finite-dimensional space and admits a natural geometric interpretation. We show that thresholds bounded away from zero induce stable decision regions, while vanishing thresholds admit degenerate behavior. A canonical threshold at angle $\pi/4$ yields a normalized bound $1/\sqrt{2}$, providing a symmetric reference point for balanced decision criteria.
+\end{abstract}
+
+\section{Introduction}
+
+Decision systems often rely on scalar scores to determine whether an action should be taken. We consider a simple model in which such decisions are governed by a constraint threshold applied to a normalized alignment score.
+
+The purpose of this paper is to define this mechanism in a minimal mathematical setting and to analyze the stability properties induced by a fixed threshold.
+
+\section{Model}
+
+Let $V = \mathbb{R}^d$ be a finite-dimensional real vector space with standard inner product $\langle \cdot, \cdot \rangle$.
+
+\begin{definition}
+Let $x \in V$ be a signal vector and $c \in V$ be a constraint vector with $\|c\| = 1$. Define the alignment score
+\[
+s(x) = \frac{\langle x, c \rangle}{\|x\|},
+\]
+whenever $x \neq 0$.
+\end{definition}
+
+Thus $s(x)$ is the cosine of the angle between $x$ and $c$, and satisfies
+\[
+-1 \le s(x) \le 1.
+\]
+
+\begin{definition}
+Fix a threshold $\tau \in [0,1]$. The constraint gate is the decision rule:
+\[
+G_\tau(x) =
+\begin{cases}
+\text{allow} & \text{if } s(x) \ge \tau, \\
+\text{block} & \text{otherwise}.
+\end{cases}
+\]
+\end{definition}
+
+\section{Geometric Interpretation}
+
+The condition $s(x) \ge \tau$ is equivalent to
+\[
+\cos \theta \ge \tau,
+\]
+where $\theta$ is the angle between $x$ and $c$.
+
+Thus, the allowed region is a cone:
+\[
+\theta \le \arccos(\tau).
+\]
+
+\section{Stability of Thresholds}
+
+We now characterize how the threshold $\tau$ affects the decision region.
+
+\begin{proposition}
+If $\tau > 0$, then the allowed region excludes all vectors orthogonal to $c$.
+\end{proposition}
+
+\begin{proof}
+If $x$ is orthogonal to $c$, then $\langle x, c \rangle = 0$, so $s(x)=0 < \tau$.
+\end{proof}
+
+\begin{theorem}
+Let $\tau > 0$. Then the allowed region
+\[
+\{ x \in V : s(x) \ge \tau \}
+\]
+is a closed convex cone with nonzero angular separation from its complement.
+\end{theorem}
+
+\begin{proof}
+The set $\{x : \langle x, c \rangle \ge \tau \|x\|\}$ is closed and convex. The condition $\tau > 0$ implies a strictly positive angular gap between allowed and blocked regions.
+\end{proof}
+
+\section{Degeneracy at Zero Threshold}
+
+\begin{theorem}
+If $\tau = 0$, then the gate reduces to
+\[
+G_0(x) = \text{allow} \quad \text{if and only if} \quad \langle x, c \rangle \ge 0.
+\]
+In this case, the boundary between allowed and blocked regions has no angular separation.
+\end{theorem}
+
+\begin{proof}
+If $\tau = 0$, then $s(x) \ge 0$ is equivalent to $\langle x, c \rangle \ge 0$. The separating hyperplane is $\langle x, c \rangle = 0$, which has zero angular margin.
+\end{proof}
+
+Thus, $\tau = 0$ yields a degenerate decision boundary.
+
+\section{Reference Threshold at $\pi/4$}
+
+A symmetric threshold is obtained by setting
+\[
+\tau = \frac{1}{\sqrt{2}},
+\]
+which corresponds to angle
+\[
+\theta = \frac{\pi}{4}.
+\]
+
+\begin{proposition}
+If $\tau = 1/\sqrt{2}$, then the allowed region consists of all vectors forming an angle at most $\pi/4$ with $c$.
+\end{proposition}
+
+\begin{proof}
+Immediate from $\cos(\pi/4)=1/\sqrt{2}$.
+\end{proof}
+
+This threshold provides a balanced criterion: the projection of $x$ onto $c$ must be at least a fixed fraction of its norm.
+
+\section{Robustness Under Perturbation}
+
+\begin{proposition}
+Let $\tau > 0$. Then there exists $\varepsilon > 0$ such that if $x$ satisfies $s(x) \ge \tau + \varepsilon$, small perturbations of $x$ do not change the decision outcome.
+\end{proposition}
+
+\begin{proof}
+Continuity of $s(x)$ implies stability under perturbations away from the threshold boundary.
+\end{proof}
+
+Thus, positive thresholds create a buffer region that stabilizes decisions.
+
+\section{Conclusion}
+
+We have defined a constraint-gated decision system based on normalized alignment scores. The key structural distinction is:
+
+\begin{itemize}
+    \item Positive thresholds $\tau > 0$ induce stable decision regions with nonzero angular margin
+    \item The zero threshold $\tau = 0$ yields a degenerate boundary
+\end{itemize}
+
+The canonical threshold $\tau = 1/\sqrt{2}$ (angle $\pi/4$) provides a symmetric reference point for balanced gating.
+
+\end{document}
